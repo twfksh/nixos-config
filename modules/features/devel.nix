@@ -3,7 +3,7 @@
   flake.nixosModules.devel = { pkgs, ... }: {
     # Installed system-wide so every editor and shell finds them on PATH.
     environment.systemPackages = with pkgs; [
-      # Editors. Installed system-wide so GNOME lists Zed in the app menu.
+      # Editors. Installed system-wide.
       zed-editor
       vscode
       (writeShellScriptBin "zed" ''
