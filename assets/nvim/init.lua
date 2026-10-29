@@ -188,7 +188,7 @@ vim.lsp.config("tinymist", require("lsp.tinymist"))
 vim.lsp.config("nixd", { settings = { nixd = { formatting = { command = { "nixfmt" } } } } })
 vim.lsp.config("*", { capabilities = require("blink.cmp").get_lsp_capabilities() })
 
-local default_color = "vague"
+local default_color = "everforest"
 
 require("fzf-lua").setup {
 	winopts = {

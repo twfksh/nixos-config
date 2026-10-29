@@ -17,6 +17,8 @@
       nodejs_26
       bun
       zig
+      python3
+      uv
 
       # Build tools and debugger
       gcc

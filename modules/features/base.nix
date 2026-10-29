@@ -34,6 +34,7 @@
       fd
       gh
       chafa
+      fastfetch
     ];
   };
 
