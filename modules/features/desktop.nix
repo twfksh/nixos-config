@@ -30,6 +30,8 @@
       gnome-tour
       # Redundant with Firefox
       epiphany
+      # Replaced by Celluloid below
+      showtime
       # Replaced by Resources below
       gnome-system-monitor
       # Unused
@@ -38,7 +40,10 @@
     ];
 
     # Process/resource monitor to replace GNOME System Monitor.
-    environment.systemPackages = with pkgs; [ resources ];
+    environment.systemPackages = with pkgs; [
+      resources
+      celluloid
+    ];
 
     # Install Firefox with browser integration.
     programs.firefox.enable = true;
