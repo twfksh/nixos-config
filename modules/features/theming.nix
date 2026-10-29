@@ -3,12 +3,37 @@
   flake.nixosModules.theming = { pkgs, lib, ... }: {
     # Yaru (Ubuntu's theme) for GTK, icons, cursors, sounds and the GNOME Shell.
     environment.systemPackages = with pkgs; [
-      yaru-theme
+      # yaru-theme ships a "Yaru session" .desktop file, which GDM would list
+      # next to GNOME. Strip it so GDM only offers GNOME.
+      (yaru-theme.overrideAttrs (old: {
+        postInstall = (old.postInstall or "") + ''
+          rm -rf "$out/share/wayland-sessions"
+        '';
+      }))
       gnomeExtensions.user-themes
       gnomeExtensions.rounded-window-corners-reborn
-      ubuntu-sans
-      ubuntu-sans-mono
     ];
+
+    # UI font: Ubuntu Sans. Monospace: JetBrains Mono. Maple Mono NF is
+    # available for editors/terminals, and Symbols Nerd Font Mono supplies icon
+    # glyphs that JetBrains Mono lacks.
+    fonts.packages = with pkgs; [
+      ubuntu-sans
+      jetbrains-mono
+      maple-mono.NF
+      nerd-fonts.symbols-only
+    ];
+
+    # Fontconfig fallback only kicks in for glyphs JetBrains Mono is missing
+    # (Nerd Font icons); Maple Mono NF already bundles them.
+    fonts.fontconfig.localConf = ''
+      <match target="pattern">
+        <test qual="any" name="family"><string>JetBrains Mono</string></test>
+        <edit name="family" mode="append" binding="strong">
+          <string>Symbols Nerd Font Mono</string>
+        </edit>
+      </match>
+    '';
 
     # Cursor for XWayland and other non-GNOME clients.
     environment.sessionVariables = {
@@ -30,7 +55,7 @@
             accent-color = "orange";
             font-name = "Ubuntu Sans 11";
             document-font-name = "Ubuntu Sans 11";
-            monospace-font-name = "Ubuntu Sans Mono 13";
+            monospace-font-name = "JetBrains Mono 13";
           };
 
           "org/gnome/desktop/sound" = {

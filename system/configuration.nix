@@ -4,8 +4,12 @@
     imports = [
       self.nixosModules.systemHardware
       self.nixosModules.base
+      self.nixosModules.devel
       self.nixosModules.networking
+      self.nixosModules.docker
       self.nixosModules.desktop
+      self.nixosModules.terminal
+      self.nixosModules.homeManager
       self.nixosModules.theming
       self.nixosModules.audio
       self.nixosModules.printing

@@ -1,9 +1,15 @@
-{ self, inputs, ... }: {
+{ self, inputs, config, ... }:
+let
+  identity = config.identity;
+in
+{
 
   flake.nixosModules.users = { pkgs, ... }: {
-    users.users.toufiq = {
+    users.users.${identity.username} = {
       isNormalUser = true;
-      description = "Toufiq Shishir";
+      # Pinned so the rootless Docker socket path can be derived declaratively.
+      uid = 1000;
+      description = identity.fullName;
       extraGroups = [ "networkmanager" "wheel" "uinput" ];
       shell = pkgs.zsh;
     };

@@ -5,6 +5,13 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:denful/import-tree";
 
+    # Per-user configuration (currently the Ghostty terminal). Inputs follow
+    # the system nixpkgs so packages and options stay in lockstep.
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     wrapper-modules.url = "github:nix-community/nix-wrapper-modules";
   };
 

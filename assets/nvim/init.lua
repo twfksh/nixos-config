@@ -1,0 +1,381 @@
+-- Plugins come from Nix and are loaded here, before anything requires them.
+vim.cmd("packloadall")
+vim.cmd([[set mouse=a]])
+vim.cmd([[set noswapfile]])
+vim.cmd([[hi @lsp.type.number gui=bold]])
+vim.opt.winborder = "single"
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.showtabline = 2
+vim.opt.signcolumn = "yes"
+vim.opt.wrap = false
+vim.opt.cursorcolumn = false
+vim.opt.cursorline = true
+-- vim.opt.ignorecase = true
+vim.opt.smartindent = true
+vim.opt.termguicolors = true
+vim.opt.undofile = true
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.cmd("filetype plugin indent on")
+
+vim.opt.statusline = " %{%v:lua.require('statusline').mode_name()%} %<%f %h%m%r%=%-14.(%l,%c%V%) %P "
+vim.opt.laststatus = 3
+
+vim.g.mapleader = " "
+
+local map = vim.keymap.set
+
+require("session"):init()
+
+
+require("blink.cmp").setup({
+	keymap = {
+		preset = "enter",
+		["<C-e>"] = false,
+	},
+	snippets = { preset = "luasnip" },
+	sources = {
+		default = { "lsp", "path", "snippets", "buffer" },
+	},
+	fuzzy = { implementation = "lua" },
+})
+
+require('gitsigns').setup({
+	signs = {
+		add          = { text = '+' },
+		change       = { text = '~' },
+		delete       = { text = '_' },
+		topdelete    = { text = '‾' },
+		changedelete = { text = '~' },
+	},
+	-- Enable inline blame
+	current_line_blame = true,
+	current_line_blame_opts = {
+		virt_text = true,
+		virt_text_pos = 'eol', -- Position at the end of the line
+		delay = 250,         -- Delay in milliseconds before blame shows up
+		ignore_whitespace = false,
+	},
+	-- on_attach = function(bufnr)
+	--   local gitsigns = require('gitsigns')
+	--
+	--   local function map(mode, l, r, opts)
+	--     opts = opts or {}
+	--     opts.buffer = bufnr
+	--     vim.keymap.set(mode, l, r, opts)
+	--   end
+	--
+	--   -- Navigation
+	--   map('n', ']c', function()
+	--     if vim.wo.diff then
+	--       vim.cmd.normal({']c', bang = true})
+	--     else
+	--       gitsigns.nav_hunk('next')
+	--     end
+	--   end, { desc = 'Jump to next git hunk' })
+	--
+	--   map('n', '[c', function()
+	--     if vim.wo.diff then
+	--       vim.cmd.normal({'[c', bang = true})
+	--     else
+	--       gitsigns.nav_hunk('prev')
+	--     end
+	--   end, { desc = 'Jump to previous git hunk' })
+	--
+	--   -- Actions
+	--   map('v', '<leader>hs', function() gitsigns.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end, { desc = 'git [s]tage hunk' })
+	--   map('v', '<leader>hr', function() gitsigns.reset_hunk {vim.fn.line('.'), vim.fn.line('v')} end, { desc = 'git [r]eset hunk' })
+	--   map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
+	--   map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })
+	--   map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer' })
+	--   map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'git [R]eset buffer' })
+	--   map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
+	--   map('n', '<leader>hb', function() gitsigns.blame_line{full=true} end, { desc = 'git [b]lame line' })
+	--   map('n', '<leader>hd', gitsigns.diffthis, { desc = 'git [d]iff this' })
+	--   map('n', '<leader>hD', function() gitsigns.diffthis('~') end, { desc = 'git [D]iff this ~' })
+	--
+	--   -- Toggles
+	--   map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git line [b]lame' })
+	--   map('n', '<leader>tw', gitsigns.toggle_word_diff, { desc = '[T]oggle git [w]ord diff' })
+	-- end,
+})
+
+
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "typst",
+	once = true,
+	callback = function()
+		require("typst-preview").setup()
+	end,
+})
+
+require("csvview").setup({
+	parser = {
+		comments = { "#", "//" },
+	},
+	keymaps = {
+		textobject_field_inner = { "if", mode = { "o", "x" } },
+		textobject_field_outer = { "af", mode = { "o", "x" } },
+		jump_next_field_end = { "<Tab>", mode = { "n", "v" } },
+		jump_prev_field_end = { "<S-Tab>", mode = { "n", "v" } },
+		jump_next_row = { "<Enter>", mode = { "n", "v" } },
+		jump_prev_row = { "<S-Enter>", mode = { "n", "v" } },
+	},
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "csv", "tsv" },
+	group = vim.api.nvim_create_augroup("csvview_auto_enable", { clear = true }),
+	callback = function(args)
+		vim.schedule(function()
+			if vim.api.nvim_buf_is_valid(args.buf) then
+				vim.cmd.CsvViewEnable()
+			end
+		end)
+	end,
+})
+
+local dap, dapui = require("dap"), require("dapui")
+
+dap.adapters.codelldb = {
+	type = "server",
+	port = "${port}",
+	executable = { command = "codelldb", args = { "--port", "${port}" } },
+}
+local codelldb_launch = {
+	name = "Launch",
+	type = "codelldb",
+	request = "launch",
+	program = function() return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file") end,
+	cwd = "${workspaceFolder}",
+	stopOnEntry = false,
+}
+dap.configurations.c = { codelldb_launch }
+dap.configurations.cpp = { codelldb_launch }
+dap.configurations.rust = { codelldb_launch }
+
+dap.listeners.after.event_initialized["dapui_config"] = function()
+	dapui.open()
+end
+dap.listeners.before.event_terminated["dapui_config"] = function()
+	dapui.close()
+end
+dap.listeners.before.event_exited["dapui_config"] = function()
+	dapui.close()
+end
+
+require "marks".setup {
+	builtin_marks = { "<", ">", "^" },
+}
+
+vim.api.nvim_create_autocmd('FileType', {
+	pattern = { 'svelte', 'markdown', 'lua', 'odin', 'rust', 'typst',
+		'typescript', 'javascript', 'c', 'cpp', 'glsl', 'zig', 'python',
+		"typescriptreact", "react", },
+	callback = function(args)
+		if vim.bo[args.buf].buftype ~= "" or not vim.bo[args.buf].buflisted then
+			return
+		end
+
+		pcall(vim.treesitter.start, args.buf)
+	end,
+})
+
+
+vim.lsp.config("lua_ls", require("lsp.lua_ls"))
+vim.lsp.config("tinymist", require("lsp.tinymist"))
+vim.lsp.config("nixd", { settings = { nixd = { formatting = { command = { "nixfmt" } } } } })
+vim.lsp.config("*", { capabilities = require("blink.cmp").get_lsp_capabilities() })
+
+local default_color = "vague"
+
+require("fzf-lua").setup {
+	winopts = {
+		fullscreen = true,
+		border = "single",
+		preview = {
+			border = "border-sharp",
+		},
+	},
+}
+
+vim.lsp.enable({
+	"lua_ls", "tinymist",
+	"cssls", "svelte", "tailwindcss",
+	"rust_analyzer", "clangd", "zls",
+	"ruff", "pyrefly", "vtsls",
+	"glsl_analyzer", "nixd", "gopls", "roslyn_ls",
+})
+
+require("oil").setup({
+	lsp_file_methods = {
+		enabled = true,
+		timeout_ms = 1000,
+		autosave_changes = true,
+	},
+	columns = {
+		"icon",
+	},
+	float = {
+		max_width = 0.3,
+		max_height = 0.6,
+		border = "single",
+	},
+})
+
+vim.o.background = "dark"
+
+-- everforest options (applied whenever `:colorscheme everforest` is run)
+vim.g.everforest_background = "medium"
+vim.g.everforest_transparent_background = 2
+vim.g.everforest_better_performance = 1
+vim.g.everforest_enable_italic = 1
+
+-- vague options (applied whenever `:colorscheme vague` is run)
+require("vague").setup({
+	transparent = true,
+})
+
+-- keep floating windows transparent for whichever colorscheme is active
+vim.api.nvim_create_autocmd("ColorScheme", {
+	callback = function()
+		for _, name in ipairs({ "NormalFloat", "FloatBorder", "Pmenu" }) do
+			local highlight = vim.api.nvim_get_hl(0, { name = name, link = false })
+			highlight.bg = nil
+			highlight.ctermbg = nil
+			highlight.blend = nil
+			vim.api.nvim_set_hl(0, name, highlight --[[@as vim.api.keyset.highlight]])
+		end
+	end,
+})
+
+vim.cmd.colorscheme(default_color)
+require("statusline").setup()
+require("luasnip").setup({ enable_autosnippets = true })
+local ls = require("luasnip")
+local fzf = require("fzf-lua")
+
+
+local function open_current_html()
+	local path = vim.api.nvim_buf_get_name(0)
+	if path == "" then
+		vim.notify("Preview requires a saved HTML file", vim.log.levels.ERROR)
+		return
+	end
+
+	vim.cmd.update()
+
+	local result = vim.system({ "xdg-open", path }, { text = true }):wait()
+	if result.code ~= 0 then
+		local output = result.stderr ~= "" and result.stderr or result.stdout
+		if output == "" then
+			output = "Failed to open " .. path
+		end
+		vim.notify(output or "<empty>", vim.log.levels.ERROR)
+	end
+end
+
+local function preview_current_file()
+	local filetype = vim.bo.filetype
+	if filetype == "typst" then
+		vim.cmd.TypstPreviewToggle()
+	elseif filetype == "html" then
+		open_current_html()
+	else
+		vim.notify("No preview action configured for filetype: " .. filetype, vim.log.levels.WARN)
+	end
+end
+
+map({ "n", "x" }, "<leader>y", '"+y')
+-- map({ "n", "x" }, "<leader>d", '"+d')
+map({ "i", "s" }, "<C-e>", function() ls.expand_or_jump(1) end, { silent = true })
+map({ "i", "s" }, "<C-J>", function() ls.jump(1) end, { silent = true })
+map({ "i", "s" }, "<C-K>", function() ls.jump(-1) end, { silent = true })
+map({ "n", "t" }, "<leader>t", "<Cmd>split<CR> <Cmd>term<CR>i")
+map({ "n", "t" }, "<leader>x", "<Cmd>tabclose<CR>")
+map("n", "<C-c>", "<Cmd>qa!<CR>", { desc = "Quit Neovim" })
+
+vim.cmd([[
+	nnoremap g= g+| " g=g=g= is less awkward than g+g+g+
+	nnoremap gK @='ddkPJ'<cr>| " join lines but reversed. `@=` so [count] works
+	xnoremap gK <esc><cmd>keeppatterns '<,'>-global/$/normal! ddpkJ<cr>
+	noremap! <c-r><c-d> <c-r>=strftime('%F')<cr>
+	noremap! <c-r><c-t> <c-r>=strftime('%T')<cr>
+	noremap! <c-r><c-f> <c-r>=expand('%:t')<cr>
+	noremap! <c-r><c-p> <c-r>=expand('%:p')<cr>
+	xnoremap <expr> . "<esc><cmd>'<,'>normal! ".v:count1.'.<cr>'
+]])
+
+
+for i = 1, 8 do
+	map({ "n", "t" }, "<leader>" .. i, "<Cmd>tabnext " .. i .. "<CR>")
+end
+
+local opts = { noremap = true, silent = true }
+map("n", "yag", ":%y<CR>", opts)
+map("n", "vag", "ggVG", opts)
+map("n", "<leader>m", "<Cmd>make<CR>", opts)
+map("n", "n", "nzzzv")
+map("n", "N", "Nzzzv")
+map("v", "<", "<gv", opts)
+map("v", ">", ">gv", opts)
+map("n", "<ESC>", ":nohlsearch<CR>", opts)
+map("n", "gl", "$", { desc = "Jump: End of line" })
+
+map({ "n", "v", "x" }, ";", ":", { desc = "Self explanatory" })
+
+map({ "n", "v", "x" }, "<leader>r", ":edit!<CR>", { desc = "Reload current file" })
+map({ "n", "v", "x" }, "<leader>v", "<Cmd>edit $MYVIMRC<CR>", { desc = "Edit " .. vim.fn.expand("$MYVIMRC") })
+map({ "n", "v", "x" }, "<leader>n", ":norm ", { desc = "ENTER NORM COMMAND." })
+map({ "n", "v", "x" }, "<leader>o", "<Cmd>source %<CR>", { desc = "Source " .. vim.fn.expand("$MYVIMRC") })
+map({ "n", "v", "x" }, "<leader>O", "<Cmd>restart<CR>", { desc = "Restart vim." })
+map({ "n", "v", "x" }, "<C-s>", [[:s/\V]], { desc = "Enter substitue mode in selection" })
+map({ "n", "v", "x" }, "<leader>i", [[<Cmd>tabedit .gitignore<CR>]], { desc = "Enter substitue mode in selection" })
+map({ "n", "v", "x" }, "<leader>lf", vim.lsp.buf.format, { desc = "Format current buffer" })
+map({ "v", "x", "n" }, "<C-y>", '"+y', { desc = "System clipboard yank." })
+
+map({ "n" }, "<leader>p", preview_current_file, { desc = "Preview current file" })
+
+map("n", "<leader>ss", function() require("session"):save() end, { desc = "Save session" })
+map("n", "<leader>sd", function() require("session"):delete() end, { desc = "Delete session" })
+
+map({ "n" }, "<leader>ff", fzf.files, { desc = "Find files" })
+map({ "n" }, "<leader>fl", fzf.live_grep)
+map({ "n" }, "<leader>fo", fzf.oldfiles)
+map({ "n" }, "<leader>fb", fzf.buffers)
+map({ "n" }, "<leader>fh", fzf.help_tags)
+map({ "n" }, "<leader>fm", fzf.marks)
+map({ "n" }, "<leader>fM", fzf.manpages)
+map({ "n" }, "<leader>fg", function() fzf.files({ no_ignore = true }) end)
+map({ "n" }, "<leader>fc", fzf.git_commits)
+map({ "n" }, "<leader>fr", fzf.lsp_references)
+map({ "n" }, "<leader>fd", fzf.diagnostics_document)
+map({ "n" }, "<leader>ft", fzf.lsp_typedefs)
+map({ "n" }, "<leader>f.", fzf.builtin)
+map({ "n" }, "<leader>fk", fzf.keymaps)
+map({ "n" }, "<leader>ca", fzf.lsp_code_actions, { desc = "LSP code actions" })
+
+map({ "n" }, "<M-n>", "<cmd>resize +2<CR>")
+map({ "n" }, "<M-e>", "<cmd>resize -2<CR>")
+map({ "n" }, "<M-i>", "<cmd>vertical resize +5<CR>")
+map({ "n" }, "<M-m>", "<cmd>vertical resize -5<CR>")
+
+map({ "n" }, "-", "<cmd>Oil<CR>")
+map({ "n" }, "<leader>c", "1z=")
+map({ "n" }, "<C-q>", ":copen<CR>", { silent = true })
+map({ "n" }, "<C-f>", "<Cmd>silent !xdg-open .<CR>", { desc = "Open current directory in Finder." })
+map({ "n" }, "<leader>a", ":edit #<CR>", { desc = "Switch to the alternate buffer" })
+
+map("n", "<C-d>", "<C-d>zz")
+map("n", "<C-u>", "<C-u>zz")
+map("n", "n", "nzzzv")
+map("n", "N", "Nzzzv")
+
+vim.api.nvim_create_autocmd("BufWinEnter", {
+	pattern = "*.jsx,*.tsx",
+	group = vim.api.nvim_create_augroup("TS", { clear = true }),
+	callback = function()
+		vim.cmd([[set filetype=typescriptreact]])
+	end
+})
