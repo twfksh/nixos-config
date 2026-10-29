@@ -12,6 +12,7 @@
       }))
       gnomeExtensions.user-themes
       gnomeExtensions.rounded-window-corners-reborn
+      gnomeExtensions.dash-to-dock
     ];
 
     # UI font: Ubuntu Sans. Monospace: JetBrains Mono. Maple Mono NF is
@@ -81,11 +82,28 @@
             enabled-extensions = [
               "user-theme@gnome-shell-extensions.gcampax.github.com"
               "rounded-window-corners@fxgn"
+              "dash-to-dock@micxgx.gmail.com"
             ];
           };
 
           "org/gnome/shell/extensions/user-theme" = {
             name = "Yaru-dark";
+          };
+
+          # Ubuntu-style dock: bottom, smart auto-hide. Replaces the Overview dash.
+          "org/gnome/shell/extensions/dash-to-dock" = {
+            dock-position = "BOTTOM";
+            dock-fixed = false;
+            extend-height = false;
+            autohide = true;
+            intellihide = true;
+            intellihide-mode = "ALL_WINDOWS";
+            dash-max-icon-size = lib.gvariant.mkInt32 40;
+            click-action = "minimize";
+            isolate-workspaces = true;
+            show-trash = false;
+            show-mounts = false;
+            transparency-mode = "DEFAULT";
           };
         };
       }
