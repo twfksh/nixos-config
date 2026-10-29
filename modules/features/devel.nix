@@ -54,6 +54,9 @@
       # Formatters and linters
       nixfmt
       stylua
+
+      # API testing
+      bruno
     ];
   };
 
