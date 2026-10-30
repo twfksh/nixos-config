@@ -1,12 +1,15 @@
 # Neovim
 
 Installed and configured in `modules/features/nvim.nix` through Home Manager.
-The Lua config lives in `assets/nvim/`.
+The Lua config lives in `apps/nvim/`.
 
 ## How it's wired
 
 - `init.lua` is passed to Home Manager, which writes it to `~/.config/nvim/init.lua`.
 - `lua/` and `after/` are linked into `~/.config/nvim/`.
+- `~/.config/nvim/{init.lua,lua,after}` are read-only store symlinks. Anything that
+  writes into the config dir (e.g. colorscheme syntax caches) must be pointed
+  elsewhere or disabled — see `everforest_better_performance` in `init.lua`.
 - Plugins come from nixpkgs (`programs.neovim.plugins`). There is no plugin manager.
 - Language servers and tools are on `PATH` through `programs.neovim.extraPackages`.
   Mason is not used.

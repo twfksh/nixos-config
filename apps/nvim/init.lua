@@ -229,7 +229,9 @@ vim.o.background = "dark"
 -- everforest options (applied whenever `:colorscheme everforest` is run)
 vim.g.everforest_background = "medium"
 vim.g.everforest_transparent_background = 2
-vim.g.everforest_better_performance = 1
+-- The config is symlinked out of the read-only nix store, so everforest cannot
+-- generate its `after/syntax` cache; apply the highlights eagerly instead.
+vim.g.everforest_better_performance = 0
 vim.g.everforest_enable_italic = 1
 
 -- vague options (applied whenever `:colorscheme vague` is run)
@@ -250,7 +252,10 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 	end,
 })
 
-vim.cmd.colorscheme(default_color)
+local color_ok, color_err = pcall(vim.cmd.colorscheme, default_color)
+if not color_ok then
+	vim.notify(("colorscheme %s failed: %s"):format(default_color, color_err), vim.log.levels.ERROR)
+end
 require("statusline").setup()
 require("luasnip").setup({ enable_autosnippets = true })
 local ls = require("luasnip")
