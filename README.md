@@ -11,7 +11,7 @@ NixOS configuration for `toufiqspc`, built with
 - `modules/identity.nix`: username, full name, email and hostname (edit here only)
 - `modules/features/`: one file per feature. A file can define the system part
   (`flake.nixosModules.<name>`), the Home Manager part (`flake.homeModules.<name>`), or both.
-- `assets/`: non-Nix files used by modules: the Neovim config and the Ghostty shader
+- `apps/`: non-Nix files used by modules: the Neovim config and the Ghostty shader
 - `docs/`: reference notes for Zed and Neovim
 
 Every `.nix` file under `modules/` and `system/` is imported automatically. To add

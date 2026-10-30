@@ -112,11 +112,11 @@
     # Ghostty resolves custom-shader paths relative to its config file, so the
     # shader must live next to ~/.config/ghostty/config.
     xdg.configFile."ghostty/shaders/cursor_smear.glsl".source =
-      ../../assets/ghostty/shaders/cursor_smear.glsl;
+      ../../apps/ghostty/shaders/cursor_smear.glsl;
 
     # Named ANSI colors, so the output follows the Ghostty theme.
     xdg.configFile."fastfetch/config.jsonc".source =
-      ../../assets/fastfetch/config.jsonc;
+      ../../apps/fastfetch/config.jsonc;
   };
 
 }

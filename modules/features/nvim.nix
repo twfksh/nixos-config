@@ -5,7 +5,7 @@
       enable = true;
 
       # Home Manager writes init.lua with the plugin paths added before this file.
-      initLua = builtins.readFile ../../assets/nvim/init.lua;
+      initLua = builtins.readFile ../../apps/nvim/init.lua;
 
       plugins = with pkgs.vimPlugins; [
         everforest
@@ -32,8 +32,8 @@
 
     # The config is copied into the store, so changes need a rebuild.
     xdg.configFile = {
-      "nvim/lua".source = ../../assets/nvim/lua;
-      "nvim/after".source = ../../assets/nvim/after;
+      "nvim/lua".source = ../../apps/nvim/lua;
+      "nvim/after".source = ../../apps/nvim/after;
     };
   };
 
