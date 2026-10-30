@@ -28,6 +28,7 @@
       htop
       wget
       curl
+      surge-downloader
       ripgrep
       fzf
       git
