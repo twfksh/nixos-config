@@ -1,15 +1,39 @@
-{ self, inputs, ... }: {
+{ self, inputs, ... }:
+
+let
+  # User-level tool directories. Shared by the Home Manager session path and
+  # the zsh fallback below so the two lists cannot drift apart.
+  userBinDirs = [
+    "$HOME/.opencode/bin"
+    "$HOME/.pi/agent/bin"
+    "$HOME/.local/bin"
+    "$HOME/.bun/bin"
+    "$HOME/.cargo/bin"
+    "$HOME/.dotnet/tools"
+    "$HOME/go/bin"
+  ];
+in {
 
   flake.nixosModules.shell = { pkgs, ... }: {
     programs.zsh.enable = true;
     users.defaultUserShell = pkgs.zsh;
   };
 
-  flake.homeModules.shell = {
+  flake.homeModules.shell = { lib, ... }: {
+    home.sessionPath = userBinDirs;
+
     programs.zsh = {
       enable = true;
 
       initContent = ''
+        # Home Manager applies home.sessionPath from hm-session-vars.sh, which is
+        # sourced once per login session and returns early whenever
+        # __HM_SESS_VARS_SOURCED is already exported. GDM hands the graphical
+        # session a stale copy of that variable with a PATH that lacks these
+        # directories, so add them here as well. typeset -U path (set above by
+        # Home Manager) drops duplicates and keeps the first occurrence.
+        path=(${lib.concatMapStringsSep " " (dir: "\"${dir}\"") userBinDirs} $path)
+
         # Install zap on first shell start. Nix does not package it, so it is
         # cloned from GitHub into the XDG data directory.
         ZAP_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/zap"
@@ -28,16 +52,6 @@
         plug "zap-zsh/vim"
       '';
     };
-
-    home.sessionPath = [
-      "$HOME/.opencode/bin"
-      "$HOME/.pi/agent/bin"
-      "$HOME/.local/bin"
-      "$HOME/.bun/bin"
-      "$HOME/.cargo/bin"
-      "$HOME/.dotnet/tools"
-      "$HOME/go/bin"
-    ];
   };
 
 }

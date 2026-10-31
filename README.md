@@ -53,4 +53,6 @@ nix flake update                                # update inputs
 - Git and Jujutsu share the identity from `modules/identity.nix`.
 - Rootless Docker runs as a systemd user service started at login.
 - Timezone is `Asia/Dhaka`.
+- Bengali and broad Unicode coverage come from Noto plus Unifont; see
+  `docs/fonts.md`.
 - `system.stateVersion` and `home.stateVersion` mark the install date. Do not change them when updating.

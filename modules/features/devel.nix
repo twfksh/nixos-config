@@ -59,6 +59,9 @@
 
       # API testing
       bruno
+
+      # Database
+      dbeaver-bin
     ];
   };
 

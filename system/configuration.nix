@@ -11,6 +11,7 @@
       self.nixosModules.terminal
       self.nixosModules.homeManager
       self.nixosModules.theming
+      self.nixosModules.fonts
       self.nixosModules.audio
       self.nixosModules.printing
       self.nixosModules.users

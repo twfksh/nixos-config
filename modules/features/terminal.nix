@@ -38,7 +38,7 @@
   };
 
   # Ported from ~/dotfiles/ghostty/.config/ghostty/config.
-  flake.homeModules.terminal = {
+  flake.homeModules.terminal = { pkgs, ... }: {
     programs.ghostty.enable = true;
     programs.ghostty.settings = {
       # Window
@@ -55,10 +55,12 @@
 
       # Fonts. The dotfiles use "JetBrainsMono Nerd Font" and "Maple NF",
       # which are not installed here; JetBrains Mono (with Symbols Nerd Font
-      # Mono as the fallback) and Maple Mono NF are the installed equivalents.
+      # Mono for icons and Noto Sans Bengali for Bengali text) and Maple Mono
+      # NF are the installed equivalents.
       font-family = [
         "JetBrains Mono"
         "Symbols Nerd Font Mono"
+        "Noto Sans Bengali"
       ];
       font-family-bold = "JetBrains Mono";
       font-family-italic = "Maple Mono NF";
@@ -114,9 +116,13 @@
     xdg.configFile."ghostty/shaders/cursor_smear.glsl".source =
       ../../apps/ghostty/shaders/cursor_smear.glsl;
 
-    # Named ANSI colors, so the output follows the Ghostty theme.
-    xdg.configFile."fastfetch/config.jsonc".source =
-      ../../apps/fastfetch/config.jsonc;
+    # fastfetch config. The Kitty image protocol needs a real file path, so the
+    # NixOS logo placeholder is replaced with the nixos-icons PNG.
+    xdg.configFile."fastfetch/config.jsonc".text =
+      builtins.replaceStrings
+        [ "@NIXOS_LOGO@" ]
+        [ "${pkgs.nixos-icons}/share/icons/hicolor/1024x1024/apps/nix-snowflake.png" ]
+        (builtins.readFile ../../apps/fastfetch/config.jsonc);
   };
 
 }
