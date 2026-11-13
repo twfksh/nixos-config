@@ -52,6 +52,8 @@ nix flake update                                # update inputs
 - Ghostty is the default terminal. tmux uses vim-tmux-navigator.
 - Git and Jujutsu share the identity from `modules/identity.nix`.
 - Rootless Docker runs as a systemd user service started at login.
+- Tailscale runs as a system service; enroll this device once with
+  `sudo tailscale up`. The tailnet interface is trusted by the firewall.
 - Timezone is `Asia/Dhaka`.
 - Bengali and broad Unicode coverage come from Noto plus Unifont; see
   `docs/fonts.md`.
