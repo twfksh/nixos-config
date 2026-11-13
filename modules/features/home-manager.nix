@@ -19,6 +19,7 @@ in
       users.${identity.username} = {
         imports = [
           self.homeModules.shell
+          self.homeModules.devel
           self.homeModules.terminal
           self.homeModules.tmux
           self.homeModules.zed

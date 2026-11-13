@@ -65,4 +65,19 @@
     ];
   };
 
+  # Development environment tooling installed in the user profile.
+  flake.homeModules.devel = { pkgs, ... }: {
+    home.packages = with pkgs; [
+      devenv
+    ];
+
+    # devenv generates direnv-managed shells; nix-direnv caches the Garbage
+    # Collector roots those shells build.
+    programs.direnv = {
+      enable = true;
+      enableZshIntegration = true;
+      nix-direnv.enable = true;
+    };
+  };
+
 }
