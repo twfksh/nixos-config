@@ -116,13 +116,9 @@
     xdg.configFile."ghostty/shaders/cursor_smear.glsl".source =
       ../../apps/ghostty/shaders/cursor_smear.glsl;
 
-    # fastfetch config. The Kitty image protocol needs a real file path, so the
-    # NixOS logo placeholder is replaced with the nixos-icons PNG.
-    xdg.configFile."fastfetch/config.jsonc".text =
-      builtins.replaceStrings
-        [ "@NIXOS_LOGO@" ]
-        [ "${pkgs.nixos-icons}/share/icons/hicolor/1024x1024/apps/nix-snowflake.png" ]
-        (builtins.readFile ../../apps/fastfetch/config.jsonc);
+    # fastfetch config. The logo is fastfetch's own ASCII art, so nothing has
+    # to be substituted into the file.
+    xdg.configFile."fastfetch/config.jsonc".source = ../../apps/fastfetch/config.jsonc;
   };
 
 }
