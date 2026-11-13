@@ -28,7 +28,7 @@
       htop
       wget
       curl
-      surge-downloader
+      aria2
       ripgrep
       fzf
       git
