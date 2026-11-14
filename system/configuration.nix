@@ -6,6 +6,7 @@
       self.nixosModules.base
       self.nixosModules.devel
       self.nixosModules.networking
+      self.nixosModules.ssh
       self.nixosModules.docker
       self.nixosModules.desktop
       self.nixosModules.terminal

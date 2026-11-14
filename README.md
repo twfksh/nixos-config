@@ -54,6 +54,9 @@ nix flake update                                # update inputs
 - Rootless Docker runs as a systemd user service started at login.
 - Tailscale runs as a system service; enroll this device once with
   `sudo tailscale up`. The tailnet interface is trusted by the firewall.
+- OpenSSH is enabled in `modules/features/ssh.nix`. Log in as `toufiq` over the
+  LAN or the tailnet with a password until an `authorizedKeys` entry is added;
+  set `PasswordAuthentication = false` once a key is in place.
 - Timezone is `Asia/Dhaka`.
 - Bengali and broad Unicode coverage come from Noto plus Unifont; see
   `docs/fonts.md`.
