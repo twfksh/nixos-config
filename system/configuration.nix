@@ -9,6 +9,7 @@
       self.nixosModules.ssh
       self.nixosModules.docker
       self.nixosModules.desktop
+      self.nixosModules.power
       self.nixosModules.terminal
       self.nixosModules.homeManager
       self.nixosModules.theming
